@@ -1,15 +1,6 @@
-body {
-    margin: 0;
-    padding: 0;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #0f0f0f;
-}
-
-#app {
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+:root { color-scheme: light; background: #ded8c5; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #ded8c5; }
+#app { width: 100%; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#game-container { width: 100%; height: 100%; }
+canvas { display: block; image-rendering: pixelated; }
