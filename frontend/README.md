@@ -1,3 +1,45 @@
+# Fussy Child frontend
+
+## Connect to the backend
+
+Use Node.js 22.6+ and run these commands from `frontend/`:
+
+```sh
+npm install
+cp .env.example .env.local
+npm run dev-nolog
+```
+
+Open http://localhost:8080. `.env.example` points to https://fussy-child.onrender.com.
+For a local backend, set `VITE_API_URL=http://localhost:3001` in `.env.local`.
+Restart Vite after editing environment variables. Without a configured URL, the client uses localhost:3001.
+Only the backend URL belongs here: never put Gemini or ElevenLabs keys in `VITE_` variables.
+
+The browser sends the target, selected item, and previous offers to `/api/react`.
+Dialogue, emotion, victory, and speech come from the backend. Failed requests leave
+attempts unchanged and allow another choice. New game aborts pending requests and
+stops speech. If autoplay is blocked, click **PLAY VOICE** or press **R**.
+Text gameplay continues when speech is unavailable. Requests time out after 90 seconds
+so a cold Render instance has time to start.
+
+## Checks and deployment
+
+```sh
+npm test
+npm run check
+npm run build-nolog
+```
+
+Tests check the API contract, validation, failure handling, and cancellation without
+calling paid providers. `check` runs TypeScript. Upload `dist/` after building.
+Set `VITE_API_URL=https://fussy-child.onrender.com` in your frontend hosting service's
+**build environment**, then rebuild. Vite embeds this public URL at build time.
+Set backend `FRONTEND_ORIGIN` to the exact frontend origin (scheme, hostname, optional
+port; no trailing slash). The backend currently accepts one origin; its local default
+is `http://localhost:8080`.
+
+---
+
 # Phaser Vite TypeScript Template
 
 This is a Phaser project template that uses Vite for bundling. It supports hot-reloading for quick development workflow, includes TypeScript support and scripts to generate production-ready builds.

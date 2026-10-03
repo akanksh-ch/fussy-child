@@ -1,5 +1,6 @@
 import { Scene, GameObjects, Math as PhaserMath } from 'phaser';
-import { items, Item, reactToItem } from '../data/items';
+import { items, Item } from '../data/items';
+import { requestReaction } from '../api';
 
 const ink = 0x383d32;
 const cream = 0xfff9e9;
@@ -7,6 +8,10 @@ const cream = 0xfff9e9;
 export class Game extends Scene {
     private target: Item;
     private attempts = 0;
+    private history: string[] = [];
+    private request?: AbortController;
+    private audio?: HTMLAudioElement;
+    private replay: GameObjects.Text;
     private busy = false;
     private won = false;
     private dialogue: GameObjects.Text;
@@ -24,6 +29,7 @@ export class Game extends Scene {
 
     create() {
         this.attempts = 0;
+        this.history = [];
         this.busy = false;
         this.won = false;
         this.cards = [];
@@ -51,6 +57,9 @@ export class Game extends Scene {
         this.dialogue = this.label(580, 455, "I want something! But you have to guess…", 21)
             .setWordWrapWidth(440);
 
+        this.replay = this.label(1068, 565, 'REPLAY VOICE [R]', 12).setOrigin(1, 0)
+            .setInteractive({ useHandCursor: true }).setVisible(false);
+        this.replay.on('pointerdown', () => this.playVoice());
         this.label(560, 580, 'WHAT SHOULD MUM GIVE TIMMY?', 23).setOrigin(0.5);
         items.forEach((item, index) => this.makeCard(item, index));
         this.counter = this.label(48, 756, 'ATTEMPTS: 0', 15);
@@ -59,10 +68,16 @@ export class Game extends Scene {
         this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
             if (event.repeat) return;
             if (event.key.toLowerCase() === 'n') this.scene.restart();
+            if (event.key.toLowerCase() === 'r') this.playVoice();
             const index = Number(event.key) - 1;
             if (items[index]) this.offer(items[index], index);
         });
-        this.events.once('shutdown', () => this.input.keyboard?.removeAllListeners());
+        this.events.once('shutdown', () => {
+            this.input.keyboard?.removeAllListeners();
+            this.request?.abort();
+            this.request = undefined;
+            this.stopVoice();
+        });
     }
 
     private label(x: number, y: number, text: string, size = 18, color = '#383d32') {
@@ -146,11 +161,30 @@ export class Game extends Scene {
         this.cards.push(card);
     }
 
+    private stopVoice() {
+        this.audio?.pause();
+        this.audio = undefined;
+    }
+
+    private async playVoice() {
+        const audio = this.audio;
+        if (!audio) return;
+        audio.currentTime = 0;
+        try {
+            await audio.play();
+            if (this.audio === audio) this.replay.setText('REPLAY VOICE [R]');
+        } catch {
+            if (this.audio === audio) this.replay.setText('PLAY VOICE [R]');
+        }
+    }
+
     private offer(item: Item, index: number) {
         if (this.busy || this.won) return;
         this.busy = true;
-        this.attempts++;
-        this.counter.setText(`ATTEMPTS: ${this.attempts}`);
+        this.stopVoice();
+        this.replay.setVisible(false);
+        const request = new AbortController();
+        this.request = request;
         this.status.setText(`Mum offers ${item.name.toLowerCase()}…`);
         this.cards.forEach(card => card.setAlpha(0.6));
         this.cards[index].setAlpha(1);
@@ -159,18 +193,46 @@ export class Game extends Scene {
             targets: offered, x: 790, y: 306, duration: 450, ease: 'Back.easeOut',
             onComplete: () => {
                 offered.destroy();
-                this.won = item.id === this.target.id;
-                this.dialogue.setText(reactToItem(this.target, item, this.attempts));
-                this.face.setText(this.won ? 'D' : '−');
-                this.status.setText(this.won ? 'Mystery solved! New game? [N]' : 'Not quite! Follow the clue and try again.');
-                this.tweens.add({ targets: this.timmy, y: this.won ? 343 : 361, x: this.won ? 855 : 863,
-                    duration: 110, yoyo: true, repeat: this.won ? 3 : 2,
-                    onComplete: () => { this.busy = false; },
-                });
-                if (this.won) this.celebrate();
-                else this.cards.forEach(card => card.setAlpha(1));
+                void this.respond(item, request);
             },
         });
+    }
+
+    private async respond(item: Item, request: AbortController) {
+        this.status.setText('Timmy is thinking…');
+        try {
+            const result = await requestReaction(this.target.id, item.id, this.history, request.signal);
+            // A reset starts a new puzzle on this same Scene instance.
+            if (this.request !== request) return;
+            this.history.push(item.id);
+            this.attempts++;
+            this.counter.setText(`ATTEMPTS: ${this.attempts}`);
+            this.won = result.success;
+            this.dialogue.setText(result.dialogue);
+            this.face.setText({ annoyed: '−', hopeful: '⌣', sad: '︵', excited: 'D' }[result.emotion]);
+            this.status.setText(this.won ? 'Mystery solved! New game? [N]' : 'Not quite! Follow the clue and try again.');
+            this.tweens.add({ targets: this.timmy, y: this.won ? 343 : 361, x: this.won ? 855 : 863,
+                duration: 110, yoyo: true, repeat: this.won ? 3 : 2,
+            });
+            if (this.won) this.celebrate();
+            if (result.audio) {
+                this.audio = new Audio(`data:audio/mpeg;base64,${result.audio.base64}`);
+                this.replay.setText('REPLAY VOICE [R]').setVisible(true);
+                void this.playVoice();
+            } else {
+                this.replay.setText('VOICE UNAVAILABLE').setVisible(true);
+            }
+        } catch (error) {
+            if (this.request !== request) return;
+            this.status.setText(error instanceof Error && error.message.startsWith('Timmy')
+                ? error.message : 'Could not reach Timmy. Pick an item to retry.');
+        } finally {
+            if (this.request === request) {
+                this.request = undefined;
+                this.busy = false;
+                if (!this.won) this.cards.forEach(card => card.setAlpha(1));
+            }
+        }
     }
 
     private celebrate() {
