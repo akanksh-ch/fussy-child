@@ -1,0 +1,97 @@
+# Fussy Child API
+
+Node.js 22 or newer. Uses the installed Google GenAI and ElevenLabs SDKs and Express 5.
+
+## Run
+
+From `backend/`, run `npm install`, configure `.env` using `.env.example`, then run `npm run dev` (watch mode) or `npm start`.
+Existing environment variables take precedence over `.env`. Never put API keys in frontend environment variables.
+
+The default address is `http://localhost:3001`. `GET /api/health` reports server health without calling either provider.
+Set `FRONTEND_ORIGIN` to the exact browser origin if it differs from `http://localhost:8080`.
+Set `ELEVENLABS_VOICE_ID` to the chosen licensed character voice. The default stock voice is a placeholder, not a five-year-old boy voice.
+The default dialogue model is `gemma-4-26b-a4b-it`, accessed through the Gemini API.
+Models are configurable through `GEMINI_MODEL` and `ELEVENLABS_MODEL_ID`.
+
+## React to an offer
+
+```sh
+curl http://localhost:3001/api/react \
+  -H 'Content-Type: application/json' \
+  -d '{"target":"orange","offered_item":"apple","history":["banana"]}'
+```
+
+Valid IDs: `apple`, `banana`, `strawberry`, `carrot`, `chocolate` (chocolate cake), `orange`.
+`history` contains previous offers, excludes the current offer, and is limited to 50 IDs.
+The browser owns the puzzle's target and history, as described in IDEA.md. New games need no backend reset.
+
+The response contains:
+
+```json
+{
+  "dialogue": "Nooo! I want something round and juicy!",
+  "emotion": "hopeful",
+  "success": false,
+  "clue_type": "shape",
+  "audio": { "mime_type": "audio/mpeg", "base64": "..." },
+  "audio_error": null
+}
+```
+
+Dialogue includes the reaction and indirect hint. Emotion is `annoyed`, `hopeful`, `sad`, or `excited`.
+Clue type is `category`, `colour`, `shape`, or `none`. The server computes success by comparing IDs.
+Invalid model output or an explicit target-name leak is replaced with a safe short response before speech synthesis.
+This guard detects literal item names; it cannot guarantee detection of every semantic paraphrase.
+
+To play the returned speech in a browser:
+
+```js
+if (response.audio) {
+  const audio = new Audio(`data:${response.audio.mime_type};base64,${response.audio.base64}`);
+  await audio.play(); // Handle rejection by offering a replay button.
+}
+```
+
+Speech failure returns HTTP 200 with valid dialogue, `audio: null`, and `audio_error` so the game can continue.
+Gemini failure returns HTTP 502; retry the same offer without advancing local game state.
+Invalid requests return 400, oversized bodies 413, unsupported content types 415, and excess concurrent calls 429.
+SDK requests have 20-second timeouts, including the speech stream. Requests are limited to 8 KB and four simultaneous generations.
+
+This is a local demo API bound to loopback by default. CORS is not authentication; add authentication and per-user quotas before public deployment.
+The frontend currently uses hardcoded reactions; this branch supplies the API contract for connecting it.
+
+## Checks
+
+From the repository root:
+
+```sh
+bash backend/test.sh
+```
+
+This runs the offline reaction check, starts a temporary local API with dummy keys,
+and checks health, preflight, origin rejection, methods, paths, content types,
+invalid input, malformed JSON, and body limits. No API credits are used.
+Requires Node.js 22+, installed backend dependencies, Bash, and curl.
+The script stops its server and removes temporary files on exit.
+It uses port 3101; override it with `TEST_PORT=3102 bash backend/test.sh`.
+
+To also check real Gemini dialogue and ElevenLabs audio, configure `backend/.env` first:
+
+```sh
+bash backend/test.sh --live
+```
+
+Live mode makes two requests to each provider (wrong offer and correct offer) and
+uses API credits. Missing audio fails the live check, even though the API deliberately
+returns dialogue when speech is unavailable. The check verifies nonempty audio;
+listen in the browser to judge voice quality.
+
+If a live request returns 502, the script also prints `Gemini request failed:` with
+the provider status and a redacted message. Use this to distinguish rejected keys,
+quota limits, unavailable models, invalid requests, and connection failures. The
+browser still receives only the generic error. Existing shell environment variables
+override `.env`, so also check for stale exported keys or model settings.
+
+For only the offline reaction check, run `npm test` from `backend/`. It covers invalid
+choices, generated hints, target-name filtering, authoritative success, speech payloads,
+speech failure, and Gemini failure.
