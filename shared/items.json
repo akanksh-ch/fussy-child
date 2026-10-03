@@ -1,0 +1,146 @@
+[
+  {
+    "id": "apple",
+    "name": "Apple",
+    "category": "Fruit",
+    "sprite": "fruit_apple.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want fruit.",
+      "It has red skin.",
+      "Round, with a core inside!"
+    ]
+  },
+  {
+    "id": "banana",
+    "name": "Banana",
+    "category": "Fruit",
+    "sprite": "fruit_banana.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want fruit.",
+      "I peel it before eating.",
+      "Long, curved, and yellow!"
+    ]
+  },
+  {
+    "id": "orange",
+    "name": "Orange",
+    "category": "Fruit",
+    "sprite": "fruit_orange.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want fruit.",
+      "I peel it before eating.",
+      "Round, with juicy segments inside!"
+    ]
+  },
+  {
+    "id": "strawberry",
+    "name": "Strawberry",
+    "category": "Fruit",
+    "sprite": "fruit_strawberry.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want fruit.",
+      "It has red skin.",
+      "Tiny seeds all over the outside!"
+    ]
+  },
+  {
+    "id": "bread",
+    "name": "Bread",
+    "category": "Bakery",
+    "sprite": "pastry_bread.png",
+    "clues": [
+      "Something made in an oven!",
+      "I want something from the bakery.",
+      "Slice it for a sandwich!",
+      "A short loaf with soft slices!"
+    ]
+  },
+  {
+    "id": "baguette",
+    "name": "Baguette",
+    "category": "Bakery",
+    "sprite": "pastry_baguette.png",
+    "clues": [
+      "Something made in an oven!",
+      "I want something from the bakery.",
+      "Slice it for a sandwich!",
+      "A very long, crusty loaf!"
+    ]
+  },
+  {
+    "id": "croissant",
+    "name": "Croissant",
+    "category": "Bakery",
+    "sprite": "pastry_croissant.png",
+    "clues": [
+      "Something made in an oven!",
+      "I want something from the bakery.",
+      "A twisty or curved shape!",
+      "Flaky layers shaped like a moon!"
+    ]
+  },
+  {
+    "id": "pretzel",
+    "name": "Pretzel",
+    "category": "Bakery",
+    "sprite": "pastry_pretzel.png",
+    "clues": [
+      "Something made in an oven!",
+      "I want something from the bakery.",
+      "A twisty or curved shape!",
+      "A salty knot with little holes!"
+    ]
+  },
+  {
+    "id": "chocolate",
+    "name": "Choc cake",
+    "category": "Cake",
+    "sprite": "cake_chocolate.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want a slice of cake.",
+      "Some cocoa in the sponge!",
+      "Brown sponge with dark frosting!"
+    ]
+  },
+  {
+    "id": "strawberry_cake",
+    "name": "Berry cake",
+    "category": "Cake",
+    "sprite": "cake_strawberry.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want a slice of cake.",
+      "No cocoa in this slice!",
+      "Pink topping with a berry!"
+    ]
+  },
+  {
+    "id": "red_velvet",
+    "name": "Red velvet",
+    "category": "Cake",
+    "sprite": "cake_redvelvet.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want a slice of cake.",
+      "Some cocoa in the sponge!",
+      "Deep red sponge and pale frosting!"
+    ]
+  },
+  {
+    "id": "cheesecake",
+    "name": "Cheesecake",
+    "category": "Cake",
+    "sprite": "cake_cheese.png",
+    "clues": [
+      "My snack should taste sweet.",
+      "I want a slice of cake.",
+      "No cocoa in this slice!",
+      "Creamy filling on a crumbly base!"
+    ]
+  }
+]

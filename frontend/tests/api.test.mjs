@@ -4,7 +4,7 @@ import { requestReaction } from '../src/game/api.ts';
 
 test('offers use the API contract; failures and cancellation reject', async t => {
     const reaction = { dialogue: 'Something round!', emotion: 'hopeful', success: false,
-        clue_type: 'shape', audio: null, audio_error: 'Speech unavailable' };
+        clue: 'Something round!', clue_level: 1, audio: null, audio_error: 'Speech unavailable' };
     let response = new Response(JSON.stringify(reaction));
     t.mock.method(globalThis, 'fetch', async (url, options) => {
         assert.equal(url, 'http://localhost:3001/api/react');

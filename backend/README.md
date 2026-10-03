@@ -26,7 +26,7 @@ curl http://localhost:3001/api/react \
   -d '{"target":"orange","offered_item":"apple","history":["banana"]}'
 ```
 
-Valid IDs: `apple`, `banana`, `strawberry`, `carrot`, `chocolate` (chocolate cake), `orange`.
+Valid IDs are defined in `../shared/items.json`: 12 foods across Fruit, Bakery, and Cake. `chocolate` remains chocolate cake; carrot is no longer playable.
 `history` contains previous offers, excludes the current offer, and is limited to 50 IDs.
 The browser owns the puzzle's target and history, as described in IDEA.md. New games need no backend reset.
 
@@ -34,19 +34,22 @@ The response contains:
 
 ```json
 {
-  "dialogue": "Nooo! I want something round and juicy!",
+  "dialogue": "Not that one, Mum! My snack should taste sweet.",
   "emotion": "hopeful",
   "success": false,
-  "clue_type": "shape",
+  "clue": "My snack should taste sweet.",
+  "clue_level": 1,
   "audio": { "mime_type": "audio/mpeg", "base64": "..." },
   "audio_error": null
 }
 ```
 
-Dialogue includes the reaction and indirect hint. Emotion is `annoyed`, `hopeful`, `sad`, or `excited`.
-Clue type is `category`, `colour`, `shape`, or `none`. The server computes success by comparing IDs.
-Invalid model output or an explicit target-name leak is replaced with a safe short response before speech synthesis.
-This guard detects literal item names; it cannot guarantee detection of every semantic paraphrase.
+Dialogue combines a generic model reaction with an authored clue. The model receives only success, never target details.
+The backend restricts reactions to a small generic vocabulary and falls back to a fixed line for invalid output.
+Clue levels are 1 for wrong guesses 1–2, 2 for 3–4, 3 for 5–6, and 4 thereafter.
+Only distinct wrong item IDs count, including the current offer. Winning responses have `clue: null` and `clue_level: 0`.
+Clues progress through broad trait, category, shared property, and distinguishing detail.
+The backend computes success by comparing IDs. Emotion is `annoyed`, `hopeful`, `sad`, or `excited`.
 
 To play the returned speech in a browser:
 
@@ -63,7 +66,7 @@ Invalid requests return 400, oversized bodies 413, unsupported content types 415
 SDK requests have 20-second timeouts, including the speech stream. Requests are limited to 8 KB and four simultaneous generations.
 
 This is a local demo API bound to loopback by default. CORS is not authentication; add authentication and per-user quotas before public deployment.
-The frontend currently uses hardcoded reactions; this branch supplies the API contract for connecting it.
+The frontend calls this API and displays the returned dialogue and clue history.
 
 ## Checks
 

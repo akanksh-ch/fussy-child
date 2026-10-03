@@ -1,7 +1,20 @@
-# fussy-child
-A fussy child makes you guess what it wants.
+# Fussy Child
 
-Express backend setup and API contract: [backend/README.md](backend/README.md).
+Guess which food Timmy wants from 12 items across Fruit, Bakery, and Cake.
+Use the mouse or arrow keys and Enter. Rejected foods are marked and cannot be offered again.
+Clues strengthen every two distinct wrong guesses: broad trait, category, shared property, then distinguishing detail.
+Press N for a new game and R to replay the voice.
 
-Run backend checks with `bash backend/test.sh`. Add `--live` to test Gemini and
-ElevenLabs using your configured API keys and credits.
+## Run
+
+Use Node.js 22 or newer. In `backend/`, run `npm install`, configure `.env` from `.env.example`, then `npm run dev`.
+In `frontend/`, run `npm install`, then `npm run dev-nolog`. Open http://localhost:8080.
+
+## Check
+
+Run `bash backend/test.sh` for offline backend and HTTP checks.
+In `frontend/`, run `npm test`, `npm run check`, and `npm run build-nolog`.
+Backend live checks (`bash backend/test.sh --live`) use configured API keys and credits.
+
+The shared catalogue is `shared/items.json`. Deploy frontend and backend together when changing the API.
+See [backend API documentation](backend/README.md).

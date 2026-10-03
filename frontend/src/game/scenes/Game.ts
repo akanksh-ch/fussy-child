@@ -8,6 +8,9 @@ const cream = 0xfff9e9;
 export class Game extends Scene {
     private target: Item;
     private attempts = 0;
+    private clues: string[] = [];
+    private clueList: GameObjects.Text;
+    private selected = 0;
     private history: string[] = [];
     private request?: AbortController;
     private audio?: HTMLAudioElement;
@@ -30,6 +33,8 @@ export class Game extends Scene {
     create() {
         this.attempts = 0;
         this.history = [];
+        this.clues = [];
+        this.selected = 0;
         this.busy = false;
         this.won = false;
         this.cards = [];
@@ -51,26 +56,35 @@ export class Game extends Scene {
         this.label(224, 416, 'MUM', 20).setOrigin(0.5);
         this.label(224, 443, 'Patient. Mostly.', 13, '#73765f').setOrigin(0.5);
         this.label(855, 405, 'TIMMY', 20).setOrigin(0.5);
-        this.panel(555, 434, 493, 96, cream);
-        this.add.rectangle(858, 430, 20, 18, ink);
-        this.add.rectangle(858, 436, 12, 20, cream);
-        this.dialogue = this.label(580, 455, "I want something! But you have to guess…", 21)
-            .setWordWrapWidth(440);
+        this.panel(330, 195, 455, 126, cream);
+        this.add.triangle(785, 280, 0, 0, 24, 15, 0, 30, ink).setOrigin(0);
+        this.add.triangle(782, 285, 0, 0, 20, 10, 0, 20, cream).setOrigin(0);
+        this.dialogue = this.label(352, 217, "I want something! But you have to guess…", 21)
+            .setWordWrapWidth(408);
 
-        this.replay = this.label(1068, 565, 'REPLAY VOICE [R]', 12).setOrigin(1, 0)
+        this.clueList = this.label(345, 345, '', 13)
+            .setWordWrapWidth(420);
+        this.replay = this.label(780, 450, 'REPLAY VOICE [R]', 12).setOrigin(1, 0)
             .setInteractive({ useHandCursor: true }).setVisible(false);
         this.replay.on('pointerdown', () => this.playVoice());
-        this.label(560, 580, 'WHAT SHOULD MUM GIVE TIMMY?', 23).setOrigin(0.5);
+        this.label(560, 545, 'WHAT SHOULD MUM GIVE TIMMY?', 23).setOrigin(0.5);
         items.forEach((item, index) => this.makeCard(item, index));
         this.counter = this.label(48, 756, 'ATTEMPTS: 0', 15);
-        this.status = this.label(560, 756, 'Pick an item · or press 1–6', 15, '#73765f').setOrigin(0.5, 0);
+        this.status = this.label(560, 756, 'Arrow keys + Enter · or click a food', 15, '#73765f').setOrigin(0.5, 0);
         this.label(1072, 756, 'FOOD ART: ALEX · CC BY', 10, '#73765f').setOrigin(1, 0);
+        this.refreshCards();
         this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
             if (event.repeat) return;
             if (event.key.toLowerCase() === 'n') this.scene.restart();
             if (event.key.toLowerCase() === 'r') this.playVoice();
-            const index = Number(event.key) - 1;
-            if (items[index]) this.offer(items[index], index);
+            const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -6, ArrowDown: 6 };
+            if (event.key in moves) {
+                event.preventDefault();
+                this.selected = (this.selected + moves[event.key] + items.length) % items.length;
+                this.refreshCards();
+            }
+            if (event.key === 'Enter') { event.preventDefault(); this.offer(items[this.selected], this.selected); }
+
         });
         this.events.once('shutdown', () => {
             this.input.keyboard?.removeAllListeners();
@@ -93,25 +107,12 @@ export class Game extends Scene {
     }
 
     private drawShop() {
-        this.add.rectangle(560, 347, 1030, 396, 0xe7e8d2).setStrokeStyle(3, ink);
-        this.add.rectangle(560, 487, 1026, 110, 0xd5cfad);
+        this.add.rectangle(560, 330, 1030, 360, 0xe7e8d2).setStrokeStyle(3, ink);
+        this.add.rectangle(560, 473, 1026, 70, 0xd5cfad);
         for (let x = 48; x < 1080; x += 48) {
-            this.add.rectangle(x, 489, 2, 105, 0xc6c19e);
+            this.add.rectangle(x, 473, 2, 70, 0xc6c19e);
         }
-        this.add.rectangle(560, 433, 1026, 5, 0xa5ac89);
-        // A small shop backdrop keeps the characters and dialogue in the foreground.
-        this.panel(392, 191, 316, 231, 0xf6eed8);
-        this.add.rectangle(550, 203, 340, 36, 0x788763).setStrokeStyle(3, ink);
-        this.label(550, 204, 'THE CORNER SHOP', 17, '#fff9e9').setOrigin(0.5);
-        for (let row = 0; row < 2; row++) {
-            items.forEach((item, index) => {
-                this.add.image(423 + index * 51, 264 + row * 71, item.id).setDisplaySize(36, 36);
-            });
-            this.add.rectangle(550, 292 + row * 71, 310, 9, 0xb5936e);
-        }
-        this.add.rectangle(550, 399, 310, 38, 0xc59e73);
-        this.label(550, 399, 'GOOD FOOD · BIG FEELINGS', 11).setOrigin(0.5);
-        this.add.rectangle(560, 554, 1028, 3, ink);
+        this.add.rectangle(560, 438, 1026, 5, 0xa5ac89);
     }
 
     private character(x: number, y: number, child: boolean) {
@@ -144,21 +145,29 @@ export class Game extends Scene {
     }
 
     private makeCard(item: Item, index: number) {
-        const x = 48 + index * 174;
-        const card = this.add.container(x, 615);
-        const shadow = this.add.rectangle(4, 5, 154, 112, 0xc9c2a6).setOrigin(0);
-        const frame = this.add.rectangle(0, 0, 154, 112, cream).setOrigin(0).setStrokeStyle(3, ink);
-        const number = this.label(10, 8, String(index + 1), 12, '#898a72');
-        const image = this.add.image(77, 46, item.id).setDisplaySize(56, 56);
-        const name = this.label(77, 91, item.name, 16).setOrigin(0.5);
-        card.add([shadow, frame, number, image, name]);
+        const x = 48 + (index % 6) * 174;
+        const y = 578 + Math.floor(index / 6) * 84;
+        const card = this.add.container(x, y);
+        const frame = this.add.rectangle(0, 0, 154, 76, cream).setOrigin(0).setStrokeStyle(3, ink);
+        const image = this.add.image(28, 35, item.id).setDisplaySize(40, 40);
+        const name = this.label(56, 15, item.name, 13);
+        const category = this.label(56, 40, item.category, 11, '#73765f');
+        const rejected = this.label(144, 4, '×', 18, '#923e2c').setOrigin(1, 0).setVisible(false);
+        card.add([frame, image, name, category, rejected]);
         frame.setInteractive({ useHandCursor: true });
-        frame.on('pointerover', () => {
-            if (!this.busy && !this.won) { frame.setFillStyle(0xf4df9e); card.y = 609; }
-        });
-        frame.on('pointerout', () => { frame.setFillStyle(cream); card.y = 615; });
+        frame.on('pointerover', () => { this.selected = index; this.refreshCards(); });
         frame.on('pointerdown', () => this.offer(item, index));
         this.cards.push(card);
+    }
+
+    private refreshCards() {
+        this.cards.forEach((card, index) => {
+            const rejected = this.history.includes(items[index].id) && items[index].id !== this.target.id;
+            card.setAlpha(rejected ? 0.4 : this.busy ? 0.65 : 1);
+            (card.list[0] as GameObjects.Rectangle).setStrokeStyle(index === this.selected ? 4 : 2,
+                index === this.selected ? 0xae583d : ink);
+            (card.list[4] as GameObjects.Text).setVisible(rejected);
+        });
     }
 
     private stopVoice() {
@@ -179,16 +188,17 @@ export class Game extends Scene {
     }
 
     private offer(item: Item, index: number) {
-        if (this.busy || this.won) return;
+        if (this.busy || this.won || this.history.includes(item.id)) return;
         this.busy = true;
         this.stopVoice();
         this.replay.setVisible(false);
         const request = new AbortController();
         this.request = request;
         this.status.setText(`Mum offers ${item.name.toLowerCase()}…`);
-        this.cards.forEach(card => card.setAlpha(0.6));
+        this.selected = index;
+        this.refreshCards();
         this.cards[index].setAlpha(1);
-        const offered = this.add.image(125 + index * 174, 661, item.id).setDisplaySize(56, 56).setDepth(10);
+        const offered = this.add.image(this.cards[index].x + 28, this.cards[index].y + 35, item.id).setDisplaySize(56, 56).setDepth(10);
         this.tweens.add({
             targets: offered, x: 790, y: 306, duration: 450, ease: 'Back.easeOut',
             onComplete: () => {
@@ -209,6 +219,9 @@ export class Game extends Scene {
             this.counter.setText(`ATTEMPTS: ${this.attempts}`);
             this.won = result.success;
             this.dialogue.setText(result.dialogue);
+            if (result.clue && !this.clues.includes(result.clue)) this.clues.push(result.clue);
+            this.clueList.setText(this.clues.map((clue, index) => `${index + 1}. ${clue}`).join('\n'));
+            this.refreshCards();
             this.face.setText({ annoyed: '−', hopeful: '⌣', sad: '︵', excited: 'D' }[result.emotion]);
             this.status.setText(this.won ? 'Mystery solved! New game? [N]' : 'Not quite! Follow the clue and try again.');
             this.tweens.add({ targets: this.timmy, y: this.won ? 343 : 361, x: this.won ? 855 : 863,
@@ -230,7 +243,7 @@ export class Game extends Scene {
             if (this.request === request) {
                 this.request = undefined;
                 this.busy = false;
-                if (!this.won) this.cards.forEach(card => card.setAlpha(1));
+                this.refreshCards();
             }
         }
     }

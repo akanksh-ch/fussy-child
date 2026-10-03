@@ -20,7 +20,7 @@ node --input-type=module -e '
 '
 
 # Offline provider stubs: no credentials or API credits needed.
-node --test reaction.test.js
+node --test
 
 export PORT="${TEST_PORT:-3101}"
 export HOST=127.0.0.1
@@ -111,10 +111,11 @@ assert.equal(typeof result.dialogue, 'string');
 assert.ok(result.dialogue.trim());
 assert.ok(result.dialogue.trim().split(/\s+/).length < 15);
 assert.ok(['annoyed', 'hopeful', 'sad', 'excited'].includes(result.emotion));
-assert.ok(['category', 'colour', 'shape', 'none'].includes(result.clue_type));
+assert.ok(Number.isInteger(result.clue_level));
 if (success) {
     assert.equal(result.emotion, 'excited');
-    assert.equal(result.clue_type, 'none');
+    assert.equal(result.clue_level, 0);
+    assert.equal(result.clue, null);
 } else {
     assert.doesNotMatch(result.dialogue, /\boranges?\b/i);
 }

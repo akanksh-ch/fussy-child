@@ -21,13 +21,13 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
         { target: 'orange', offered_item: 'apple', history: Array(51).fill('apple') }]) {
         assert.throws(() => validateChoice(body), { status: 400 });
     }
-    let output = { dialogue: 'Nooo! I want something round and juicy!', emotion: 'hopeful', success: false, clue_type: 'shape' };
+    let output = { dialogue: 'Not that one, Mum!', emotion: 'hopeful', success: false, clue_type: 'shape' };
     let spoken;
     let failSpeech = false;
     const providers = {
         model: 'test', voiceId: 'test', speechModel: 'eleven_v3',
         ai: { models: { generateContent: async request => {
-            assert.equal(JSON.parse(request.contents).target.name, 'orange');
+            assert.deepEqual(Object.keys(JSON.parse(request.contents)), ['success']);
             return { text: JSON.stringify(output) };
         } } },
         elevenlabs: { textToSpeech: { convert: async (_voice, request, options) => {
@@ -40,7 +40,7 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
     };
     const choice = { target: 'orange', offered_item: 'apple', history: [] };
     let result = await reactToChoice(choice, providers);
-    assert.equal(result.dialogue, output.dialogue);
+    assert.equal(result.dialogue, `${output.dialogue} ${result.clue}`);
     assert.equal(spoken, `[whining] [curious] ${result.dialogue}`);
     assert.doesNotMatch(result.dialogue, /\[/);
     assert.equal(Buffer.from(result.audio.base64, 'base64').toString(), 'mock mp3');
@@ -54,11 +54,13 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
         assert.ok(result.dialogue.split(/\s+/).length < 15);
         assert.equal(result.success, false);
         assert.doesNotMatch(result.dialogue, /orange/i);
+        assert.equal(result.clue_level, 1);
     }
     output = validOutput;
     output.dialogue = 'I want an orange!';
     result = await reactToChoice(choice, providers);
     assert.doesNotMatch(result.dialogue, /orange/i);
+        assert.equal(result.clue_level, 1);
     output.success = true;
     result = await reactToChoice(choice, providers);
     assert.equal(result.success, false);
