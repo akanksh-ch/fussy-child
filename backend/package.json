@@ -2,6 +2,18 @@
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.70.0",
     "@google/genai": "^2.27.0",
-    "dotenv": "^18.0.5"
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1"
+  },
+  "name": "fussy-child-backend",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node --watch main.js",
+    "start": "node main.js",
+    "test": "node --test"
   }
 }
