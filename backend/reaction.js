@@ -70,8 +70,23 @@ No hints, explanations, stage directions, or audio tags. Return JSON.`,
         !emotions.includes(reaction?.emotion)) {
         reaction = { dialogue: success ? 'Yay! Thanks, Mum!' : 'Not that one, Mum!', emotion: success ? 'excited' : 'annoyed' };
     }
-    const wrongOffers = new Set([...choice.history, choice.offered_item].filter(id => id !== choice.target));
-    const clue_level = success ? 0 : Math.min(4, Math.ceil(wrongOffers.size / 2));
+    const target = items[choice.target];
+    const wrongOffers = new Set();
+    let clue_level = 0;
+    let matchedClue = false;
+    // Replay distinct offers so adaptive progress survives stateless API requests.
+    for (const id of [...choice.history, choice.offered_item]) {
+        if (id === choice.target || wrongOffers.has(id)) continue;
+        const offered = items[id];
+        matchedClue = clue_level > 0 && target.clues.slice(0, clue_level).every((clue, index) =>
+            index === 0 && target.category === 'Bakery'
+                ? offered.category !== 'Fruit' // Cakes also come from an oven.
+                : offered.clues[index] === clue);
+        wrongOffers.add(id);
+        clue_level = Math.min(4, Math.max(Math.ceil(wrongOffers.size / 2), clue_level + Number(matchedClue)));
+    }
+    if (success) clue_level = 0;
+    if (!success && matchedClue) reaction = { dialogue: 'That fits! But...', emotion: 'hopeful' };
     const clue = success ? null : items[choice.target].clues[clue_level - 1];
     const result = { dialogue: clue ? `${reaction.dialogue} ${clue}` : reaction.dialogue,
         emotion: success ? 'excited' : reaction.emotion, success, clue, clue_level,

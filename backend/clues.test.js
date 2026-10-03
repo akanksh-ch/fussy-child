@@ -10,7 +10,7 @@ const providers = {
     elevenlabs: { textToSpeech: { convert: async () => { throw Error('offline'); } } },
 };
 test('clues advance every two distinct wrong offers, never from repeated guesses', async () => {
-    const guesses = ['apple', 'banana', 'strawberry', 'bread', 'baguette', 'croissant', 'pretzel'];
+    const guesses = ['bread', 'baguette', 'croissant', 'pretzel', 'chocolate', 'strawberry_cake', 'red_velvet'];
     const history = [];
     for (const [index, offered_item] of guesses.entries()) {
         const result = await reactToChoice({ target: 'orange', offered_item, history }, providers);
@@ -34,4 +34,18 @@ test('clues advance every two distinct wrong offers, never from repeated guesses
         assert.ok(result.dialogue.startsWith(success ? 'Yay!' : 'Not that one'));
         assert.equal(result.clue_level, success ? 0 : 1);
     }
+});
+
+test('an offer matching the previous clue gets acknowledgment and a stronger clue', async () => {
+    const first = await reactToChoice({ target: 'orange', offered_item: 'bread' }, providers);
+    const next = await reactToChoice({ target: 'orange', offered_item: 'strawberry_cake', history: ['bread'] }, providers);
+    assert.equal(first.clue_level, 1);
+    assert.equal(next.clue_level, 2);
+    assert.notEqual(first.clue, next.clue);
+    assert.match(next.dialogue, /That fits/);
+    assert.equal(next.emotion, 'hopeful');
+    const repeated = await reactToChoice({ target: 'orange', offered_item: 'strawberry_cake', history: ['bread', 'strawberry_cake'] }, providers);
+    assert.equal(repeated.clue_level, 2);
+    const later = await reactToChoice({ target: 'orange', offered_item: 'apple', history: ['bread', 'strawberry_cake'] }, providers);
+    assert.equal(later.clue_level, 3);
 });

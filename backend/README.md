@@ -46,7 +46,9 @@ The response contains:
 
 Dialogue combines a generic model reaction with an authored clue. The model receives only success, never target details.
 The backend restricts reactions to a small generic vocabulary and falls back to a fixed line for invalid output.
-Clue levels are 1 for wrong guesses 1–2, 2 for 3–4, 3 for 5–6, and 4 thereafter.
+Clue levels normally advance every two distinct wrong guesses, up to level 4.
+When a new offer matches all revealed clue properties, Timmy acknowledges it and advances one level immediately.
+Progress is reconstructed from offer history and never moves backwards.
 Only distinct wrong item IDs count, including the current offer. Winning responses have `clue: null` and `clue_level: 0`.
 Clues progress through broad trait, category, shared property, and distinguishing detail.
 The backend computes success by comparing IDs. Emotion is `annoyed`, `hopeful`, `sad`, or `excited`.
