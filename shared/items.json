@@ -4,11 +4,14 @@
     "name": "Apple",
     "category": "Fruit",
     "sprite": "fruit_apple.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want fruit.",
-      "It has red skin.",
-      "Round, with a core inside!"
+    "facts": [
+      "sweet",
+      "crunchy flesh",
+      "juicy",
+      "red skin",
+      "round",
+      "core inside",
+      "skin is edible"
     ]
   },
   {
@@ -16,11 +19,13 @@
     "name": "Banana",
     "category": "Fruit",
     "sprite": "fruit_banana.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want fruit.",
-      "I peel it before eating.",
-      "Long, curved, and yellow!"
+    "facts": [
+      "sweet",
+      "soft flesh",
+      "not very juicy",
+      "yellow peel",
+      "long and curved",
+      "peeled before eating"
     ]
   },
   {
@@ -28,11 +33,12 @@
     "name": "Orange",
     "category": "Fruit",
     "sprite": "fruit_orange.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want fruit.",
-      "I peel it before eating.",
-      "Round, with juicy segments inside!"
+    "facts": [
+      "sweet and citrusy",
+      "juicy",
+      "round",
+      "thick peel removed before eating",
+      "comes apart into segments"
     ]
   },
   {
@@ -40,11 +46,14 @@
     "name": "Strawberry",
     "category": "Fruit",
     "sprite": "fruit_strawberry.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want fruit.",
-      "It has red skin.",
-      "Tiny seeds all over the outside!"
+    "facts": [
+      "sweet",
+      "juicy",
+      "red",
+      "small",
+      "seeds on the outside",
+      "green leafy top",
+      "no peel to remove"
     ]
   },
   {
@@ -52,11 +61,13 @@
     "name": "Bread",
     "category": "Bakery",
     "sprite": "pastry_bread.png",
-    "clues": [
-      "Something made in an oven!",
-      "I want something from the bakery.",
-      "Slice it for a sandwich!",
-      "A short loaf with soft slices!"
+    "facts": [
+      "baked",
+      "soft inside",
+      "crust outside",
+      "short loaf",
+      "can be sliced for sandwiches",
+      "not a sweet dessert"
     ]
   },
   {
@@ -64,11 +75,12 @@
     "name": "Baguette",
     "category": "Bakery",
     "sprite": "pastry_baguette.png",
-    "clues": [
-      "Something made in an oven!",
-      "I want something from the bakery.",
-      "Slice it for a sandwich!",
-      "A very long, crusty loaf!"
+    "facts": [
+      "baked",
+      "crusty outside",
+      "very long loaf",
+      "can be sliced for sandwiches",
+      "not a sweet dessert"
     ]
   },
   {
@@ -76,11 +88,12 @@
     "name": "Croissant",
     "category": "Bakery",
     "sprite": "pastry_croissant.png",
-    "clues": [
-      "Something made in an oven!",
-      "I want something from the bakery.",
-      "A twisty or curved shape!",
-      "Flaky layers shaped like a moon!"
+    "facts": [
+      "baked",
+      "buttery",
+      "flaky layers",
+      "crescent shaped",
+      "not a frosted dessert"
     ]
   },
   {
@@ -88,11 +101,12 @@
     "name": "Pretzel",
     "category": "Bakery",
     "sprite": "pastry_pretzel.png",
-    "clues": [
-      "Something made in an oven!",
-      "I want something from the bakery.",
-      "A twisty or curved shape!",
-      "A salty knot with little holes!"
+    "facts": [
+      "baked",
+      "salty",
+      "chewy",
+      "twisted knot with holes",
+      "not sweet"
     ]
   },
   {
@@ -100,11 +114,15 @@
     "name": "Choc cake",
     "category": "Cake",
     "sprite": "cake_chocolate.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want a slice of cake.",
-      "Some cocoa in the sponge!",
-      "Brown sponge with dark frosting!"
+    "facts": [
+      "sweet",
+      "baked sponge",
+      "soft",
+      "contains cocoa",
+      "brown layers",
+      "dark frosting",
+      "not juicy",
+      "no peel"
     ]
   },
   {
@@ -112,11 +130,14 @@
     "name": "Berry cake",
     "category": "Cake",
     "sprite": "cake_strawberry.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want a slice of cake.",
-      "No cocoa in this slice!",
-      "Pink topping with a berry!"
+    "facts": [
+      "sweet",
+      "soft sponge",
+      "pink topping",
+      "berry on top",
+      "no cocoa",
+      "not juicy like fresh fruit",
+      "no peel"
     ]
   },
   {
@@ -124,11 +145,14 @@
     "name": "Red velvet",
     "category": "Cake",
     "sprite": "cake_redvelvet.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want a slice of cake.",
-      "Some cocoa in the sponge!",
-      "Deep red sponge and pale frosting!"
+    "facts": [
+      "sweet",
+      "soft sponge",
+      "contains cocoa",
+      "deep red layers",
+      "pale frosting",
+      "not juicy",
+      "no peel"
     ]
   },
   {
@@ -136,11 +160,14 @@
     "name": "Cheesecake",
     "category": "Cake",
     "sprite": "cake_cheese.png",
-    "clues": [
-      "My snack should taste sweet.",
-      "I want a slice of cake.",
-      "No cocoa in this slice!",
-      "Creamy filling on a crumbly base!"
+    "facts": [
+      "sweet",
+      "creamy filling",
+      "crumbly biscuit base",
+      "pale filling",
+      "no cocoa",
+      "not a sponge cake",
+      "no peel"
     ]
   }
 ]

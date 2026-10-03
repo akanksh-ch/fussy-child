@@ -100,7 +100,7 @@ echo 'PASS: offline reactions and HTTP validation'
 if [[ "$live" == true ]]; then
     for offered in apple orange; do
         request 200 -H 'Content-Type: application/json' \
-            --data "{\"target\":\"orange\",\"offered_item\":\"$offered\",\"history\":[\"banana\"]}" "$base/api/react"
+            --data "{\"target\":\"orange\",\"offered_item\":\"$offered\",\"history\":[]}" "$base/api/react"
         node --input-type=module - "$work/response.json" "$offered" <<'JS'
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -111,10 +111,9 @@ assert.equal(typeof result.dialogue, 'string');
 assert.ok(result.dialogue.trim());
 assert.ok(result.dialogue.trim().split(/\s+/).length < 15);
 assert.ok(['annoyed', 'hopeful', 'sad', 'excited'].includes(result.emotion));
-assert.ok(Number.isInteger(result.clue_level));
+assert.ok(result.clue === null || typeof result.clue === 'string');
 if (success) {
     assert.equal(result.emotion, 'excited');
-    assert.equal(result.clue_level, 0);
     assert.equal(result.clue, null);
 } else {
     assert.doesNotMatch(result.dialogue, /\boranges?\b/i);

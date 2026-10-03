@@ -1,6 +1,6 @@
 import { Scene, GameObjects, Math as PhaserMath } from 'phaser';
 import { items, Item } from '../data/items';
-import { requestReaction } from '../api';
+import { requestReaction, type Turn } from '../api';
 
 const ink = 0x383d32;
 const cream = 0xfff9e9;
@@ -11,7 +11,7 @@ export class Game extends Scene {
     private clues: string[] = [];
     private clueList: GameObjects.Text;
     private selected = 0;
-    private history: string[] = [];
+    private history: Turn[] = [];
     private request?: AbortController;
     private audio?: HTMLAudioElement;
     private replay: GameObjects.Text;
@@ -62,7 +62,7 @@ export class Game extends Scene {
         this.dialogue = this.label(352, 217, "I want something! But you have to guess…", 21)
             .setWordWrapWidth(408);
 
-        this.clueList = this.label(345, 345, '', 13)
+        this.clueList = this.label(345, 345, '', 11)
             .setWordWrapWidth(420);
         this.replay = this.label(780, 450, 'REPLAY VOICE [R]', 12).setOrigin(1, 0)
             .setInteractive({ useHandCursor: true }).setVisible(false);
@@ -162,7 +162,7 @@ export class Game extends Scene {
 
     private refreshCards() {
         this.cards.forEach((card, index) => {
-            const rejected = this.history.includes(items[index].id) && items[index].id !== this.target.id;
+            const rejected = this.history.some(turn => turn.offered_item === items[index].id) && items[index].id !== this.target.id;
             card.setAlpha(rejected ? 0.4 : this.busy ? 0.65 : 1);
             (card.list[0] as GameObjects.Rectangle).setStrokeStyle(index === this.selected ? 4 : 2,
                 index === this.selected ? 0xae583d : ink);
@@ -188,7 +188,7 @@ export class Game extends Scene {
     }
 
     private offer(item: Item, index: number) {
-        if (this.busy || this.won || this.history.includes(item.id)) return;
+        if (this.busy || this.won || this.history.some(turn => turn.offered_item === item.id)) return;
         this.busy = true;
         this.stopVoice();
         this.replay.setVisible(false);
@@ -214,13 +214,13 @@ export class Game extends Scene {
             const result = await requestReaction(this.target.id, item.id, this.history, request.signal);
             // A reset starts a new puzzle on this same Scene instance.
             if (this.request !== request) return;
-            this.history.push(item.id);
+            this.history.push({ offered_item: item.id, dialogue: result.dialogue });
             this.attempts++;
             this.counter.setText(`ATTEMPTS: ${this.attempts}`);
             this.won = result.success;
             this.dialogue.setText(result.dialogue);
             if (result.clue && !this.clues.includes(result.clue)) this.clues.push(result.clue);
-            this.clueList.setText(this.clues.map((clue, index) => `${index + 1}. ${clue}`).join('\n'));
+            this.clueList.setText(this.clues.slice(-4).map((clue, index) => `${index + 1}. ${clue}`).join('\n'));
             this.refreshCards();
             this.face.setText({ annoyed: '−', hopeful: '⌣', sad: '︵', excited: 'D' }[result.emotion]);
             this.status.setText(this.won ? 'Mystery solved! New game? [N]' : 'Not quite! Follow the clue and try again.');

@@ -23,35 +23,35 @@ Models are configurable through `GEMINI_MODEL` and `ELEVENLABS_MODEL_ID`.
 ```sh
 curl http://localhost:3001/api/react \
   -H 'Content-Type: application/json' \
-  -d '{"target":"orange","offered_item":"apple","history":["banana"]}'
+  -d '{"target":"orange","offered_item":"apple","history":[{"offered_item":"banana","dialogue":"Peeling is right! But I want something juicier."}]}'
 ```
 
 Valid IDs are defined in `../shared/items.json`: 12 foods across Fruit, Bakery, and Cake. `chocolate` remains chocolate cake; carrot is no longer playable.
-`history` contains previous offers, excludes the current offer, and is limited to 50 IDs.
+`history` contains previous `{offered_item, dialogue}` turns, excludes the current offer, and is limited to 50 entries. Dialogue is bounded to 160 characters per turn.
 The browser owns the puzzle's target and history, as described in IDEA.md. New games need no backend reset.
 
 The response contains:
 
 ```json
 {
-  "dialogue": "Not that one, Mum! My snack should taste sweet.",
+  "dialogue": "Juicy, yes! But mine comes in segments.",
   "emotion": "hopeful",
   "success": false,
-  "clue": "My snack should taste sweet.",
-  "clue_level": 1,
+  "clue": "Comes apart into segments",
   "audio": { "mime_type": "audio/mpeg", "base64": "..." },
   "audio_error": null
 }
 ```
 
-Dialogue combines a generic model reaction with an authored clue. The model receives only success, never target details.
-The backend restricts reactions to a small generic vocabulary and falls back to a fixed line for invalid output.
-Clue levels normally advance every two distinct wrong guesses, up to level 4.
-When a new offer matches all revealed clue properties, Timmy acknowledges it and advances one level immediately.
-Progress is reconstructed from offer history and never moves backwards.
-Only distinct wrong item IDs count, including the current offer. Winning responses have `clue: null` and `clue_level: 0`.
-Clues progress through broad trait, category, shared property, and distinguishing detail.
+The model receives the secret food, current offer, catalogue facts, and previous dialogue.
+It acknowledges useful similarities and reveals one difference, or reminds the player when an offer ignores earlier evidence.
+The model selects a fact from target properties absent from the offer; shared properties cannot be selected as differences.
+There are no clue levels or fixed clue sequences. `clue` is a short new fact (up to 60 characters), or null for reminders and wins.
 The backend computes success by comparing IDs. Emotion is `annoyed`, `hopeful`, `sad`, or `excited`.
+Output validation catches malformed responses, length violations, and literal target-name leaks before speech.
+Invalid output falls back to a neutral retry line; the model still controls semantic accuracy and clue quality.
+History is browser-owned demo state and is treated as data in the prompt, not trusted instructions.
+Deploy both sides together: history now contains turn objects and responses no longer contain `clue_level`.
 
 To play the returned speech in a browser:
 

@@ -2,7 +2,7 @@
 
 Guess which food Timmy wants from 12 items across Fruit, Bakery, and Cake.
 Use the mouse or arrow keys and Enter. Rejected foods are marked and cannot be offered again.
-Clues strengthen every two distinct wrong guesses, or sooner when an offer matches the revealed clues: broad trait, category, shared property, then distinguishing detail.
+Timmy compares each offer with his secret food and remembers earlier replies. Sensible guesses earn useful differences; guesses that ignore clues get reminders.
 Press N for a new game and R to replay the voice.
 
 ## Run
