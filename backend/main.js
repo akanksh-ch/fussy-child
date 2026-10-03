@@ -14,8 +14,8 @@ const providers = {
     ai: new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }),
     elevenlabs: new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY }),
     model: process.env.GEMINI_MODEL || 'gemma-4-26b-a4b-it',
-    voiceId: process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb',
-    speechModel: process.env.ELEVENLABS_MODEL_ID || 'eleven_flash_v2_5',
+    voiceId: process.env.ELEVENLABS_VOICE_ID || 'nNXPmxHfg9PtGzFxr9Zd',
+    speechModel: process.env.ELEVENLABS_MODEL_ID || 'eleven_v3',
 };
 const origin = process.env.FRONTEND_ORIGIN || 'http://localhost:8080';
 const port = Number(process.env.PORT || 3001);

@@ -9,7 +9,8 @@ Existing environment variables take precedence over `.env`. Never put API keys i
 
 The default address is `http://localhost:3001`. `GET /api/health` reports server health without calling either provider.
 Set `FRONTEND_ORIGIN` to the exact browser origin if it differs from `http://localhost:8080`.
-Set `ELEVENLABS_VOICE_ID` to the chosen licensed character voice. The default stock voice is a placeholder, not a five-year-old boy voice.
+The default Timmy voice is `nNXPmxHfg9PtGzFxr9Zd` with `ELEVENLABS_MODEL_ID=eleven_v3`.
+Set these values in Render too: existing environment variables override code defaults.
 The default dialogue model is `gemma-4-26b-a4b-it`, accessed through the Gemini API.
 Models are configurable through `GEMINI_MODEL` and `ELEVENLABS_MODEL_ID`.
 
