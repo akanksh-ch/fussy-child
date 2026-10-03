@@ -5,6 +5,10 @@ Use the mouse or arrow keys and Enter. Rejected foods are marked and cannot be o
 Timmy compares each offer with his secret food and remembers earlier replies. Sensible guesses earn useful differences; guesses that ignore clues get reminders.
 Press N for a new game and R to replay the voice.
 
+## Demo
+
+<iframe width="1059" height="595" src="https://www.youtube.com/embed/jrHX9qX_RQc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Run
 
 Use Node.js 22 or newer. In `backend/`, run `npm install`, configure `.env` from `.env.example`, then `npm run dev`.
