@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { GoogleGenAI } from '@google/genai';
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
-import { reactToChoice, RequestError } from './reaction.js';
+import { reactToChoice, RequestError, providerDiagnostic } from './reaction.js';
 
 const envPath = fileURLToPath(new URL('.env', import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
@@ -13,7 +13,7 @@ for (const key of ['GEMINI_API_KEY', 'ELEVENLABS_API_KEY']) {
 const providers = {
     ai: new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }),
     elevenlabs: new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY }),
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemma-4-26b-a4b-it',
     voiceId: process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb',
     speechModel: process.env.ELEVENLABS_MODEL_ID || 'eleven_flash_v2_5',
 };
@@ -45,8 +45,8 @@ app.post('/api/react', async (request, response) => {
         response.json(await reactToChoice(request.body, providers));
     } catch (error) {
         const status = error instanceof RequestError ? error.status : 502;
-        // SDK errors may contain credentials. Log only the numeric provider status.
-        if (status === 502) console.error('Gemini request failed:', Number(error.status) || 'connection error');
+        if (status === 502) console.error('Gemini request failed:', JSON.stringify(providerDiagnostic(error,
+            [process.env.GEMINI_API_KEY, process.env.ELEVENLABS_API_KEY])));
         response.status(status).json({ error: status === 502 ? 'Timmy could not respond. Please try again.' : error.message });
     } finally { activeRequests--; }
 });

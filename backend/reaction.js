@@ -14,6 +14,21 @@ export class RequestError extends Error {
     constructor(status, message) { super(message); this.status = status; }
 }
 
+// Log only the useful message, never an SDK request object or its headers.
+export function providerDiagnostic(error, secrets = []) {
+    let message = typeof error?.message === 'string' ? error.message : 'Unknown provider error';
+    try {
+        const parsed = JSON.parse(message);
+        if (typeof parsed.error?.message === 'string') message = parsed.error.message;
+    } catch { /* Connection errors are plain text. */ }
+    for (const secret of secrets.filter(Boolean)) message = message.replaceAll(secret, '[REDACTED]');
+    message = message.replace(/https?:\/\/[^\s"'<>]+/gi, '[URL]')
+        .replace(/AIza[\w-]+/g, '[REDACTED]')
+        .replace(/((?:api[_-]?key|authorization|token)\s*[=:]\s*)\S+/gi, '$1[REDACTED]')
+        .replace(/[\r\n\x00-\x1f\x7f]/g, ' ');
+    return { status: Number(error?.status) || null, message: message.slice(0, 1200) };
+}
+
 export function validateChoice(body) {
     const known = id => typeof id === 'string' && Object.hasOwn(items, id);
     if (!body || typeof body !== 'object' || Array.isArray(body) ||
@@ -70,7 +85,7 @@ Use the previous choices to avoid repetitive hints. Dialogue contains both the r
     try {
         const stream = await elevenlabs.textToSpeech.convert(voiceId, {
             text: result.dialogue, modelId: speechModel, outputFormat: 'mp3_44100_128',
-        }, { timeoutInSeconds: 20, maxRetries: 0 });
+        }, { timeoutInSeconds: 20, maxRetries: 0, abortSignal: AbortSignal.timeout(20000) });
         const chunks = [];
         let bytes = 0;
         for await (const chunk of stream) {
