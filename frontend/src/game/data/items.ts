@@ -15,17 +15,3 @@ export const items = [
 ] as const;
 
 export type Item = typeof items[number];
-
-export function reactToItem(target: Item, offered: Item, attempt: number): string {
-    if (target.id === offered.id) return "YES! That's it! You get me, Mum!";
-    const clues = [
-        target.category === offered.category
-            ? `Yes, I want ${target.category === 'fruit' ? 'fruit' : 'a ' + target.category}… but a different one!`
-            : `Nooo! I feel like ${target.category === 'fruit' ? 'fruit' : 'a ' + target.category} today.`,
-        target.colour === offered.colour
-            ? "Ooh, right colour! But that's not it."
-            : `Hmm… I want something ${target.colour}.`,
-        `The one I want is ${target.shape}. Keep looking, Mum!`,
-    ];
-    return clues[(attempt - 1) % clues.length];
-}
