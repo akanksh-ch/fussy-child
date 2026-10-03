@@ -7,7 +7,7 @@ Press N for a new game and R to replay the voice.
 
 ## Demo
 
-<iframe width="1059" height="595" src="https://www.youtube.com/embed/jrHX9qX_RQc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Fussy Child Demo](https://img.youtube.com/vi/jrHX9qX_RQc/0.jpg)](https://www.youtube.com/watch?v=jrHX9qX_RQc)
 
 ## Run
 
