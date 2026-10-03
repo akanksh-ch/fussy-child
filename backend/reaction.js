@@ -48,7 +48,9 @@ export async function reactToChoice(body, { ai, elevenlabs, model, voiceId, spee
         contents: JSON.stringify({ target, offered_item: items[choice.offered_item], history: choice.history, success }),
         config: {
             httpOptions: { timeout: 20000 },
-            systemInstruction: `You are Timmy, a funny, fussy child shopping with Mum. Return a short spoken reaction with an indirect hint.
+            systemInstruction: `You are Timmy, a whiny, impatient little cartoon child shopping with Mum. Return a short spoken reaction with an indirect hint.
+Sound adorably bratty: simple childish words, pouty protests, and an excited squeal when Mum guesses right.
+Write only spoken words in dialogue, without stage directions or bracketed audio tags.
 Use fewer than 15 words total. Keep it kind, playful, and suitable for children.
 The supplied success value is authoritative. If true, celebrate and use emotion excited and clue_type none.
 If false, never say the target name or its item ID, even as a colour. Hint at category, colour, or shape instead.
@@ -83,8 +85,13 @@ Use the previous choices to avoid repetitive hints. Dialogue contains both the r
     const result = { dialogue: reaction.dialogue, emotion: success ? 'excited' : reaction.emotion,
         success, clue_type: success ? 'none' : reaction.clue_type, audio: null, audio_error: null };
     try {
+        const expressive = speechModel === 'eleven_v3';
+        const delivery = { annoyed: '[whining] [frustrated]', hopeful: '[whining] [curious]',
+            sad: '[whining] [sad]', excited: '[excited] [laughs]' }[result.emotion];
         const stream = await elevenlabs.textToSpeech.convert(voiceId, {
-            text: result.dialogue, modelId: speechModel, outputFormat: 'mp3_44100_128',
+            text: expressive ? `${delivery} ${result.dialogue}` : result.dialogue,
+            ...(expressive ? { voiceSettings: { stability: 0, similarityBoost: 0.75 } } : {}),
+            modelId: speechModel, outputFormat: 'mp3_44100_128',
         }, { timeoutInSeconds: 20, maxRetries: 0, abortSignal: AbortSignal.timeout(20000) });
         const chunks = [];
         let bytes = 0;

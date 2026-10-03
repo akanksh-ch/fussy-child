@@ -25,13 +25,14 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
     let spoken;
     let failSpeech = false;
     const providers = {
-        model: 'test', voiceId: 'test', speechModel: 'test',
+        model: 'test', voiceId: 'test', speechModel: 'eleven_v3',
         ai: { models: { generateContent: async request => {
             assert.equal(JSON.parse(request.contents).target.name, 'orange');
             return { text: JSON.stringify(output) };
         } } },
         elevenlabs: { textToSpeech: { convert: async (_voice, request, options) => {
             assert.ok(options.abortSignal instanceof AbortSignal);
+            assert.equal(request.voiceSettings?.stability, providers.speechModel === 'eleven_v3' ? 0 : undefined);
             spoken = request.text;
             if (failSpeech) throw new Error('Speech offline');
             return (async function* () { yield Buffer.from('mock mp3'); })();
@@ -40,7 +41,8 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
     const choice = { target: 'orange', offered_item: 'apple', history: [] };
     let result = await reactToChoice(choice, providers);
     assert.equal(result.dialogue, output.dialogue);
-    assert.equal(spoken, result.dialogue);
+    assert.equal(spoken, `[whining] [curious] ${result.dialogue}`);
+    assert.doesNotMatch(result.dialogue, /\[/);
     assert.equal(Buffer.from(result.audio.base64, 'base64').toString(), 'mock mp3');
     assert.equal(result.success, false);
     const validOutput = { ...output };
@@ -66,6 +68,9 @@ test('validates choices, guards hints and wins, and preserves dialogue when spee
     assert.equal(result.emotion, 'excited');
     assert.equal(result.audio, null);
     assert.ok(result.audio_error);
+    assert.equal(spoken, `[excited] [laughs] ${result.dialogue}`);
+    providers.speechModel = 'eleven_flash_v2_5';
+    result = await reactToChoice(choice, providers);
     assert.equal(spoken, result.dialogue);
     providers.ai.models.generateContent = async () => { throw new Error('Gemini offline'); };
     await assert.rejects(reactToChoice(choice, providers), /Gemini offline/);

@@ -11,6 +11,10 @@ The default address is `http://localhost:3001`. `GET /api/health` reports server
 Set `FRONTEND_ORIGIN` to the exact browser origin if it differs from `http://localhost:8080`.
 The default Timmy voice is `nNXPmxHfg9PtGzFxr9Zd` with `ELEVENLABS_MODEL_ID=eleven_v3`.
 Set these values in Render too: existing environment variables override code defaults.
+Eleven v3 uses stability `0` (Creative) for more emotional variation. Speech gets
+`[whining]` plus an emotion tag for wrong choices, and `[excited] [laughs]` for wins.
+The speech bubble stays free of tags. Other speech models receive plain dialogue.
+Tag delivery depends on the selected voice; listen to judge the performance.
 The default dialogue model is `gemma-4-26b-a4b-it`, accessed through the Gemini API.
 Models are configurable through `GEMINI_MODEL` and `ELEVENLABS_MODEL_ID`.
 
